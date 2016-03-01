@@ -35,7 +35,8 @@ import scala.util.Random
 class IBMJDBCRelation(url: String,
                       table: String,
                       parts: Array[Partition],
-                      properties: Properties = new Properties()) (sqlContext: SQLContext) extends JDBCRelation(url,table,parts,properties)(sqlContext)
+                      properties: Properties = new Properties()) (sqlContext: SQLContext)
+  extends JDBCRelation(url, table, parts, properties)(sqlContext)
   with Logging {
 
   private def getJdbcType(dt: DataType, dialect: JdbcDialect): JdbcType = {
@@ -45,7 +46,7 @@ class IBMJDBCRelation(url: String,
 
   def createConnection(url: String, properties: Properties) : () => Connection = {
     () => {
-      JdbcUtils.createConnection(url,properties)
+      JdbcUtils.createConnection(url, properties)
     }
   }
 
@@ -64,13 +65,13 @@ class IBMJDBCRelation(url: String,
       Note: calling length on iterator moves it to last position of the element hence the duplicate
      */
     val itDuplicates = iterator.duplicate
-    val length = itDuplicates._1.length + 1 //Length is zero indexed
+    val length = itDuplicates._1.length + 1 // Length is zero indexed
     val chunk: Int = Math.ceil(length.toDouble/parallelism).toInt
 
     /*
       Spawn 'parallelism' number of threads with each inserting data into the table from chunks picked up by it
      */
-    val insertThreads = for( pCount <- 1 to parallelism toList ) yield {
+    val insertThreads = for ( pCount <- 1 to parallelism toList ) yield {
       new Thread() {
         override def run() {
           val conn = getConnection()
@@ -104,7 +105,8 @@ class IBMJDBCRelation(url: String,
                       case BooleanType => stmt.setBoolean(i + 1, row.getBoolean(i))
                       case StringType => stmt.setString(i + 1, row.getString(i))
                       case BinaryType => stmt.setBytes(i + 1, row.getAs[Array[Byte]](i))
-                      case TimestampType => stmt.setTimestamp(i + 1, row.getAs[java.sql.Timestamp](i))
+                      case TimestampType => stmt.setTimestamp(i + 1,
+                        row.getAs[java.sql.Timestamp](i))
                       case DateType => stmt.setDate(i + 1, row.getAs[java.sql.Date](i))
                       case t: DecimalType => stmt.setBigDecimal(i + 1, row.getDecimal(i))
                       case ArrayType(et, _) =>
@@ -134,8 +136,9 @@ class IBMJDBCRelation(url: String,
               }
             } catch {
               case sqle: SQLException => throw sqle.getNextException
-              case exception : NoSuchElementException => println("Hit empty iter situation")
-            }finally {
+              // TODO Add logging
+              case exception : NoSuchElementException => println("Hit empty iter situation") // scalastyle:ignore
+            } finally {
               stmt.close()
             }
             /* conn.commit()
@@ -180,8 +183,10 @@ class IBMJDBCRelation(url: String,
     val fileFormat: CSVFormat = CSVFormat.DEFAULT.withRecordSeparator("\n")
     val csvFilePrinter: CSVPrinter = new CSVPrinter(fileWriter, fileFormat)
 
-    /* Iterate through the dataFrame in this partition and write out the data to a csv file which will be used by DB2
-      Utility to load data into the table
+    /*
+       Iterate through the dataFrame in this partition and write out
+       the data to a csv file which will be used by DB2
+       Utility to load data into the table
     */
     try {
       try {
@@ -210,14 +215,14 @@ class IBMJDBCRelation(url: String,
                   }
                 case StringType => csvRow.add(row.getString(i))
                 case t: DecimalType => csvRow.add(row.getDecimal(i))
-                //case BinaryType => stmt.setBytes(i + 1, row.getAs[Array[Byte]](i))
-                //case TimestampType => stmt.setTimestamp(i + 1, row.getAs[java.sql.Timestamp](i))
-                //case DateType => stmt.setDate(i + 1, row.getAs[java.sql.Date](i))
-                /*case ArrayType(et, _) =>
+                // case BinaryType => stmt.setBytes(i + 1, row.getAs[Array[Byte]](i))
+                // case TimestampType => stmt.setTimestamp(i + 1, row.getAs[java.sql.Timestamp](i))
+                // case DateType => stmt.setDate(i + 1, row.getAs[java.sql.Date](i))
+                /* case ArrayType(et, _) =>
                        val array = conn.createArrayOf(
                          getJdbcType(et, dialect).databaseTypeDefinition.toLowerCase,
                          row.getSeq[AnyRef](i).toArray)
-                       stmt.setArray(i + 1, array)*/
+                       stmt.setArray(i + 1, array) */
                 case _ => throw new IllegalArgumentException(
                   s"Can't translate non-null value for field $i")
               }
@@ -239,7 +244,8 @@ class IBMJDBCRelation(url: String,
     val conn = getConnection()
     val columns = rddSchema.fields.map(_.name).mkString(",")
     try {
-      val sql = "call SYSPROC.ADMIN_CMD(' load from " + fileName + " of DEL insert into " + table + "( " + columns +" )')"
+      val sql = "call SYSPROC.ADMIN_CMD(' load from " + fileName +
+        " of DEL insert into " + table + "( " + columns + " )')"
       val stmt = conn.prepareStatement(sql)
       stmt.execute()
     } catch {
@@ -248,7 +254,8 @@ class IBMJDBCRelation(url: String,
       conn.close()
     }
 
-    /*val scriptfileWriter: FileWriter = new FileWriter(scriptfileName)
+    /*
+    val scriptfileWriter: FileWriter = new FileWriter(scriptfileName)
     scriptfileWriter.write("connect to sparkdb;\n")
     //scriptfileWriter.write("ingest from file " + fileName + " format delimited insert into " + table + ";")
     scriptfileWriter.write("load from " + fileName + " of DEL insert into " + table + ";")
@@ -259,7 +266,8 @@ class IBMJDBCRelation(url: String,
     //val proc:Process = Runtime.getRuntime.exec("db2 \"connect to sparkdb\" && " + "db2 'ingest from file " + fileName + "format delimited insert into " + table + "'" )
     val proc:Process = Runtime.getRuntime.exec("db2 -tvsf  "+ scriptfileName)
     proc.waitFor()
-    println(scala.io.Source.fromInputStream(proc.getInputStream).getLines().mkString("\n"))*/
+    println(scala.io.Source.fromInputStream(proc.getInputStream).getLines().mkString("\n"))
+    */
   }
 
   def saveTableData(dataFrame: DataFrame, parallelism: Int, path: String, isRemote: Boolean) = {
@@ -286,7 +294,7 @@ class IBMJDBCRelation(url: String,
 
 object IBMJDBCRelation {
   def buildPartitionArray(maxparts: Int, partKeyColName: String): Array[Partition] = {
-    if(maxparts == 0) {
+    if (maxparts == 0) {
       Array[Partition](JDBCPartition(null, 0))
     } else {
       (0 to maxparts) map { i => JDBCPartition(s"dbpartitionnum($partKeyColName)=$i", i) } toArray

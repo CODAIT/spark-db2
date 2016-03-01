@@ -33,7 +33,7 @@ object HiSpeedRead {
 
     val jdbcRdr = sqlContext.read.format("com.ibm.spark.ibmdataserver")
       .option("url", DB2_CONNECTION_URL)
-      //.option(Constants.TABLE, tableName)
+      // .option(Constants.TABLE, tableName)
       .option("user", "pallavipr")
       .option("password", "9manjari")
       .option("dbtable", "employee")

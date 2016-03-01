@@ -48,8 +48,8 @@ This file is divided into 3 sections:
 
  <check level="error" class="org.scalastyle.file.HeaderMatchesChecker" enabled="true">
   <parameters>
-   <parameter name="header"><![CDATA[/*
- * Copyright (c) 2015 Luciano Resende
+   <parameter name="header"><![CDATA[/**
+ * (C) Copyright IBM Corp. 2016
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

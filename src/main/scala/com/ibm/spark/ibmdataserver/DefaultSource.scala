@@ -31,9 +31,10 @@ class DefaultSource extends CreatableRelationProvider with DataSourceRegister wi
 
   Class.forName("com.ibm.db2.jcc.DB2Driver");
 
-  private def createTableIfNotExist(url: String, table: String, mode:SaveMode, props: Properties, dataFrame: DataFrame) : Unit = {
+  private def createTableIfNotExist(url: String, table: String, mode: SaveMode,
+                                    props: Properties, dataFrame: DataFrame) : Unit = {
 
-    val conn : Connection = JdbcUtils.createConnection(url,props)
+    val conn : Connection = JdbcUtils.createConnection(url, props)
 
     try {
       var tableExists = JdbcUtils.tableExists(conn, url, table)
@@ -72,8 +73,10 @@ class DefaultSource extends CreatableRelationProvider with DataSourceRegister wi
   }
 
 
-  private def getNumberOfPartitions(url:String, table:String, props: Properties): Array[Partition] = {
-    val conn : Connection = JdbcUtils.createConnection(url,props)
+  private def getNumberOfPartitions(url: String, table: String, props: Properties):
+              Array[Partition] = {
+
+    val conn : Connection = JdbcUtils.createConnection(url, props)
     try {
       var tableExists = JdbcUtils.tableExists(conn, url, table)
       if (!tableExists) {
@@ -84,22 +87,24 @@ class DefaultSource extends CreatableRelationProvider with DataSourceRegister wi
       try {
         // simplifying assumption that all tables are partitioned across all members
         // would need lookup of relevant members via tablespace and partition group here
-        val rs1 = stmt.executeQuery("select max(partition_number) from table(sysproc.db_partitions()) as t")
+        val rs1 = stmt.executeQuery(
+          "select max(partition_number) from table(sysproc.db_partitions()) as t")
         require(rs1.next)
         val maxparts = rs1.getInt(1)
 
-        // just need any column from the table. unfortunately we don't have the RDD schema at this point
+        // just need any column from the table.
+        // unfortunately we don't have the RDD schema at this point
         val rs2 = stmt.executeQuery("select colname from syscat.columns where tabschema = current schema " +
           s"and tabname = '${table.toUpperCase}' and partkeyseq = 1")
         var partKeyColName = ""
 
         if(maxparts > 0) {
-          //require(rs2.next, s"Table $table is not MPP partitioned")
+          // require(rs2.next, s"Table $table is not MPP partitioned")
           require(rs2.next, s"Table partition column info could not be retrieved")
           partKeyColName = rs2.getString(1)
         }
 
-        IBMJDBCRelation.buildPartitionArray(maxparts,partKeyColName)
+        IBMJDBCRelation.buildPartitionArray(maxparts, partKeyColName)
       } finally {
         stmt.close()
       }
@@ -109,11 +114,13 @@ class DefaultSource extends CreatableRelationProvider with DataSourceRegister wi
   }
 
   private def getURLFromParams(parameters: Map[String, String]): String = {
-    parameters.getOrElse(Constants.JDBCURL,sys.error("Option 'JDBCURL' [Constants.JDBCURL] not specified"))
+    parameters.getOrElse(Constants.JDBCURL,
+      sys.error("Option 'JDBCURL' [Constants.JDBCURL] not specified"))
   }
 
   private def getTableNameFromParams(parameters: Map[String, String]): String = {
-    parameters.getOrElse(Constants.TABLE,sys.error("Option 'TABLE' [Constants.TABLE] not specified"))
+    parameters.getOrElse(Constants.TABLE,
+      sys.error("Option 'TABLE' [Constants.TABLE] not specified"))
   }
 
   private def getTmpPathFromParams(parameters: Map[String, String]): String = {
@@ -131,7 +138,7 @@ class DefaultSource extends CreatableRelationProvider with DataSourceRegister wi
   }
 
   private def getParallelismFromParams(parameters: Map[String, String]): Int = {
-    var parallelism = parameters.getOrElse(Constants.PARALLELISM,"2").toInt
+    var parallelism = parameters.getOrElse(Constants.PARALLELISM, "2").toInt
     if(parallelism <= 0) {
       parallelism = 2
     }
@@ -139,10 +146,10 @@ class DefaultSource extends CreatableRelationProvider with DataSourceRegister wi
   }
 
   private def getPropertiesFromParams(parameters: Map[String, String]): Properties = {
-    val props:Properties = new Properties()
+    val props: Properties = new Properties()
 
     parameters.foreach(element => {
-      props.put(element._1,element._2)
+      props.put(element._1, element._2)
     })
 
     return props
@@ -156,15 +163,15 @@ class DefaultSource extends CreatableRelationProvider with DataSourceRegister wi
     val url: String = getURLFromParams(parameters)
     val table: String = getTableNameFromParams(parameters)
     var tmpPath: String = getTmpPathFromParams(parameters)
-    val isRemote: java.lang.Boolean =  getIsRemoteFromParams(parameters)
-    val props:Properties = getPropertiesFromParams(parameters)
+    val isRemote: java.lang.Boolean = getIsRemoteFromParams(parameters)
+    val props: Properties = getPropertiesFromParams(parameters)
     var parallelism: Int = getParallelismFromParams(parameters)
 
-    createTableIfNotExist(url,table,mode,props,data)
+    createTableIfNotExist(url, table, mode, props, data)
 
-    val parts = getNumberOfPartitions(url,table,props)
-    val relation = new IBMJDBCRelation(url,table,parts,props)(sqlContext)
-    relation.saveTableData(data,parallelism,tmpPath,isRemote)
+    val parts = getNumberOfPartitions(url, table, props)
+    val relation = new IBMJDBCRelation(url, table, parts, props)(sqlContext)
+    relation.saveTableData(data, parallelism, tmpPath, isRemote)
     return relation
   }
 
@@ -173,9 +180,10 @@ class DefaultSource extends CreatableRelationProvider with DataSourceRegister wi
                                parameters: Map[String, String]): BaseRelation = {
     val url = getURLFromParams(parameters)
     val table = getTableNameFromParams(parameters)
-    val props:Properties = getPropertiesFromParams(parameters) // Additional properties that we will pass to getConnection
+    // Additional properties that we will pass to getConnection
+    val props: Properties = getPropertiesFromParams(parameters)
 
-    val parts = getNumberOfPartitions(url,table,props)
+    val parts = getNumberOfPartitions(url, table, props)
     new IBMJDBCRelation(url, table, parts, props)(sqlContext)
   }
 }
