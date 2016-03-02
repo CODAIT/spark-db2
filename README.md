@@ -1,17 +1,19 @@
-# DB2 Hi-Speed connector for Spark
+# DB2/DashDB Hi-Speed connector for Spark
 
-A library for fast loading and unloading of data between SPARK and DB2.
+A library for fast loading and unloading of data between SPARK and DB2/DashDB.
 
 ## Requirements
 
-This library requires Spark 1.6+ and Apache Commons CSV library
+This library requires Spark 1.6+, Apache Commons CSV library and DB2 JDBC driver.
 
 ## What the package does
-This package provides option for persisting data from SPARK into DB2 at HiSpeed leveraging the DB2 LOAD utility and to retrieve data from DB2 into SPARK leveraging the capabilities of DB2 partition feature.
+This package provides options for -
+1) Persisting data from SPARK into DB2/DashDB at HiSpeed leveraging the DB2 LOAD utility.
+2) Loading of data from DB2/DashDB into SPARK using parallel read from database partitions.
 
 ### Scala API
 
-Load data from DB2 into Spark DataFrame
+Load data from DB2/DashDB into Spark DataFrame
 ```scala
 import com.ibm.spark.ibmdataserver.Constants
 import org.apache.spark.sql.SQLContext
@@ -27,7 +29,7 @@ val df = sqlContext.read
 df.show()
 ```
 
-Persist Spark DataFrame into DB2
+Persist Spark DataFrame into DB2/DashDB
 ```scala
 import com.ibm.spark.ibmdataserver.Constants
 import org.apache.spark.sql.SQLContext
