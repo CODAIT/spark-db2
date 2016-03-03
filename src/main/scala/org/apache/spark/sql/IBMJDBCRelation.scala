@@ -243,7 +243,7 @@ class IBMJDBCRelation(url: String,
 
     val conn = getConnection()
     val columns = rddSchema.fields.map(_.name).mkString(",")
-    try {
+    /*try {
       val sql = "call SYSPROC.ADMIN_CMD(' load from " + fileName +
         " of DEL insert into " + table + "( " + columns + " )')"
       val stmt = conn.prepareStatement(sql)
@@ -252,13 +252,12 @@ class IBMJDBCRelation(url: String,
       case sqle: SQLException => throw sqle
     } finally {
       conn.close()
-    }
+    }*/
 
-    /*
     val scriptfileWriter: FileWriter = new FileWriter(scriptfileName)
     scriptfileWriter.write("connect to sparkdb;\n")
     //scriptfileWriter.write("ingest from file " + fileName + " format delimited insert into " + table + ";")
-    scriptfileWriter.write("load from " + fileName + " of DEL insert into " + table + ";")
+    scriptfileWriter.write("load client from " + fileName + " of DEL insert into " + table + "( " + columns + " ) ;")
     scriptfileWriter.flush()
     scriptfileWriter.close()
 
@@ -267,7 +266,6 @@ class IBMJDBCRelation(url: String,
     val proc:Process = Runtime.getRuntime.exec("db2 -tvsf  "+ scriptfileName)
     proc.waitFor()
     println(scala.io.Source.fromInputStream(proc.getInputStream).getLines().mkString("\n"))
-    */
   }
 
   def saveTableData(dataFrame: DataFrame, parallelism: Int, path: String, isRemote: Boolean) = {
