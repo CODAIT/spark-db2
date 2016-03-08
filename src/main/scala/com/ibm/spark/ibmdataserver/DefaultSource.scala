@@ -29,12 +29,16 @@ class DefaultSource extends CreatableRelationProvider with DataSourceRegister wi
 
   override def shortName(): String = Constants.SOURCENAME
 
-  Class.forName("com.ibm.db2.jcc.DB2Driver");
+  private def getConnection(url:String, props:Properties) : Connection = {
+    Class.forName("com.ibm.db2.jcc.DB2Driver")
+    DriverManager.getConnection(url, props)
+  }
 
   private def createTableIfNotExist(url: String, table: String, mode: SaveMode,
                                     props: Properties, dataFrame: DataFrame) : Unit = {
 
-    val conn : Connection = JdbcUtils.createConnection(url, props)
+
+    val conn : Connection = getConnection(url, props)
 
     try {
       var tableExists = JdbcUtils.tableExists(conn, url, table)
@@ -76,7 +80,8 @@ class DefaultSource extends CreatableRelationProvider with DataSourceRegister wi
   private def getNumberOfPartitions(url: String, table: String, props: Properties):
               Array[Partition] = {
 
-    val conn : Connection = JdbcUtils.createConnection(url, props)
+    val conn : Connection = getConnection(url, props)
+
     try {
       var tableExists = JdbcUtils.tableExists(conn, url, table)
       if (!tableExists) {
@@ -114,13 +119,23 @@ class DefaultSource extends CreatableRelationProvider with DataSourceRegister wi
   }
 
   private def getURLFromParams(parameters: Map[String, String]): String = {
-    parameters.getOrElse(Constants.JDBCURL,
-      sys.error("Option 'JDBCURL' [Constants.JDBCURL] not specified"))
+    parameters.getOrElse(Constants.URL,
+      sys.error("Option 'url' [Constants.URL] not specified"))
+  }
+
+  private def getUserFromParams(parameters: Map[String, String]): String = {
+    parameters.getOrElse(Constants.USER,
+      sys.error("Option 'user' [Constants.USER] not specified"))
+  }
+
+  private def getPasswordFromParams(parameters: Map[String, String]): String = {
+    parameters.getOrElse(Constants.PASSWORD,
+      sys.error("Option 'password' [Constants.PASSWORD] not specified"))
   }
 
   private def getTableNameFromParams(parameters: Map[String, String]): String = {
-    parameters.getOrElse(Constants.TABLE,
-      sys.error("Option 'TABLE' [Constants.TABLE] not specified"))
+    parameters.getOrElse(Constants.DBTABLE,
+      sys.error("Option 'dbtable' [Constants.DBTABLE] not specified"))
   }
 
   private def getTmpPathFromParams(parameters: Map[String, String]): String = {
@@ -164,8 +179,10 @@ class DefaultSource extends CreatableRelationProvider with DataSourceRegister wi
     val table: String = getTableNameFromParams(parameters)
     var tmpPath: String = getTmpPathFromParams(parameters)
     val isRemote: java.lang.Boolean = getIsRemoteFromParams(parameters)
-    val props: Properties = getPropertiesFromParams(parameters)
+    var user: String = getUserFromParams(parameters)
+    var password: String = getPasswordFromParams(parameters)
     var parallelism: Int = getParallelismFromParams(parameters)
+    val props: Properties = getPropertiesFromParams(parameters)
 
     createTableIfNotExist(url, table, mode, props, data)
 

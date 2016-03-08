@@ -18,7 +18,7 @@ package org.apache.spark.sql
 
 import java.io.FileWriter
 import java.lang.Float
-import java.sql.{SQLException, Connection}
+import java.sql.{DriverManager, SQLException, Connection}
 import java.util.{NoSuchElementException, ArrayList, Properties, List}
 
 import com.ibm.spark.ibmdataserver.Constants
@@ -46,7 +46,8 @@ class IBMJDBCRelation(url: String,
 
   def createConnection(url: String, properties: Properties) : () => Connection = {
     () => {
-      JdbcUtils.createConnection(url, properties)
+      Class.forName("com.ibm.db2.jcc.DB2Driver");
+      DriverManager.getConnection(url, properties)
     }
   }
 
@@ -241,8 +242,8 @@ class IBMJDBCRelation(url: String,
       csvFilePrinter.close()
     }
 
-    val conn = getConnection()
     val columns = rddSchema.fields.map(_.name).mkString(",")
+    /*val conn = getConnection()
     try {
       val sql = "call SYSPROC.ADMIN_CMD(' load from " + fileName +
         " of DEL insert into " + table + "( " + columns + " )')"
@@ -252,22 +253,21 @@ class IBMJDBCRelation(url: String,
       case sqle: SQLException => throw sqle
     } finally {
       conn.close()
-    }
+    }*/
 
-    /*
+
     val scriptfileWriter: FileWriter = new FileWriter(scriptfileName)
-    scriptfileWriter.write("connect to sparkdb;\n")
+    scriptfileWriter.write("connect to sparkdb user " + properties.getProperty(Constants.USER) +
+      " using " + properties.getProperty(Constants.PASSWORD) + " ;\n")
     //scriptfileWriter.write("ingest from file " + fileName + " format delimited insert into " + table + ";")
-    scriptfileWriter.write("load from " + fileName + " of DEL insert into " + table + ";")
+    scriptfileWriter.write("load client from " + fileName + " of DEL insert into " + table + "( " + columns + " ) ;")
     scriptfileWriter.flush()
     scriptfileWriter.close()
-
     //Call DB2 utility to load data into table
     //val proc:Process = Runtime.getRuntime.exec("db2 \"connect to sparkdb\" && " + "db2 'ingest from file " + fileName + "format delimited insert into " + table + "'" )
     val proc:Process = Runtime.getRuntime.exec("db2 -tvsf  "+ scriptfileName)
     proc.waitFor()
     println(scala.io.Source.fromInputStream(proc.getInputStream).getLines().mkString("\n"))
-    */
   }
 
   def saveTableData(dataFrame: DataFrame, parallelism: Int, path: String, isRemote: Boolean) = {
@@ -277,7 +277,7 @@ class IBMJDBCRelation(url: String,
     }
 
     val rddSchema = dataFrame.schema
-    val getConnection: () => Connection = createConnection(url,new Properties())
+    val getConnection: () => Connection = createConnection(url,properties)
     val batchSize = properties.getProperty(Constants.BATCHSIZE, "1000").toInt
 
     if(isRemote) {

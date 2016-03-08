@@ -17,12 +17,14 @@
 package com.ibm.spark.ibmdataserver
 
 object Constants {
-  val JDBCURL = "JDBCURL"
-  val TABLE = "TABLE"
+  val URL = "url"
+  val DBTABLE = "dbtable"
   val PATH = "path"
   val ISREMOTE = "ISREMOTE"
   val PARALLELISM = "PARALLELISM"
   val BATCHSIZE = "BATCHSIZE"
   val TMPPATH = "TMPPATH"
   val SOURCENAME = "DB2JDBC"
+  val USER = "user"
+  val PASSWORD = "password"
 }
