@@ -7,9 +7,19 @@ A library for fast loading and unloading of data between SPARK and DB2/DashDB.
 This library requires Spark 1.6+, Apache Commons CSV library and DB2 JDBC driver.
 
 ## What the package does
-This package provides options for -
+This package provides options for:
+
 1) Persisting data from SPARK into DB2/DashDB at HiSpeed leveraging the DB2 LOAD utility.
+
 2) Loading of data from DB2/DashDB into SPARK using parallel read from database partitions.
+
+## Build procedure
+
+```
+git clone https://github.com/SparkTC/spark-db2
+cd spark-db2
+sbt clean package
+```
 
 ### Scala API
 
