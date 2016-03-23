@@ -138,6 +138,11 @@ class DefaultSource extends CreatableRelationProvider with DataSourceRegister wi
       sys.error("Option 'dbtable' [Constants.DBTABLE] not specified"))
   }
 
+  private def getDBNameFromParams(parameters: Map[String, String]): String = {
+    parameters.getOrElse(Constants.DBNAME,
+      sys.error("Option 'dbname' [Constants.DBNAME] not specified"))
+  }
+
   private def getTmpPathFromParams(parameters: Map[String, String]): String = {
     val systemTempPath = System.getProperty("java.io.tmpdir")
     var tmpPath = parameters.getOrElse(Constants.TMPPATH, systemTempPath)
@@ -181,6 +186,7 @@ class DefaultSource extends CreatableRelationProvider with DataSourceRegister wi
     val isRemote: java.lang.Boolean = getIsRemoteFromParams(parameters)
     var user: String = getUserFromParams(parameters)
     var password: String = getPasswordFromParams(parameters)
+    var dbName: String = getDBNameFromParams(parameters)
     var parallelism: Int = getParallelismFromParams(parameters)
     val props: Properties = getPropertiesFromParams(parameters)
 

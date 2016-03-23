@@ -27,4 +27,5 @@ object Constants {
   val SOURCENAME = "DB2JDBC"
   val USER = "user"
   val PASSWORD = "password"
+  val DBNAME = "dbname"
 }

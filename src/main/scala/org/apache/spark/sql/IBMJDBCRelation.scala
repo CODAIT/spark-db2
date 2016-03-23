@@ -257,7 +257,7 @@ class IBMJDBCRelation(url: String,
 
 
     val scriptfileWriter: FileWriter = new FileWriter(scriptfileName)
-    scriptfileWriter.write("connect to sparkdb user " + properties.getProperty(Constants.USER) +
+    scriptfileWriter.write("connect to " + properties.getProperty(Constants.DBNAME) + " user " + properties.getProperty(Constants.USER) +
       " using " + properties.getProperty(Constants.PASSWORD) + " ;\n")
     //scriptfileWriter.write("ingest from file " + fileName + " format delimited insert into " + table + ";")
     scriptfileWriter.write("load client from " + fileName + " of DEL insert into " + table + "( " + columns + " ) ;")
