@@ -1,17 +1,17 @@
-# DB2/DashDB Hi-Speed connector for Spark
+# DB2/DashDB Hi-Speed connector for Apache Spark
 
-A library for fast loading and unloading of data between SPARK and DB2/DashDB.
+A library for fast loading and unloading of data between Apache Spark and DB2/DashDB.
 
 ## Requirements
 
-This library requires Spark 1.6+, Apache Commons CSV library and DB2 JDBC driver.
+This library requires Apache Spark 1.6+, Apache Commons CSV library and DB2 JDBC driver.
 
 ## What the package does
 This package provides options for:
 
-1) Persisting data from SPARK into DB2/DashDB at HiSpeed leveraging the DB2 LOAD utility.
+1) Persisting data from Apache Spark into DB2/DashDB at HiSpeed leveraging the DB2 LOAD utility.
 
-2) Loading of data from DB2/DashDB into SPARK using parallel read from database partitions.
+2) Loading of data from DB2/DashDB into Apache Spark using parallel read from database partitions.
 
 ## Build procedure
 
@@ -23,7 +23,7 @@ sbt clean package
 
 ### Scala API
 
-Load data from DB2/DashDB into Spark DataFrame
+Load data from DB2/DashDB into Apache Spark using DataFrames API
 ```scala
 import com.ibm.spark.ibmdataserver.Constants
 import org.apache.spark.sql.SQLContext
@@ -39,7 +39,7 @@ val df = sqlContext.read
 df.show()
 ```
 
-Persist Spark DataFrame into DB2/DashDB
+Persist data from Apache Spark DataFrames into DB2/DashDB
 ```scala
 import com.ibm.spark.ibmdataserver.Constants
 import org.apache.spark.sql.SQLContext
@@ -60,7 +60,7 @@ df.write
 
 ### Java API
 
-Load data from DB2 into Spark DataFrame
+Load data from DB2 into Apache Spark using DataFrames API
 ```java
 import com.ibm.spark.ibmdataserver.Constants;
 import org.apache.spark.SparkConf;
@@ -79,7 +79,7 @@ DataFrame df = sqlContext.read().format("com.ibm.spark.ibmdataserver")
 df.show()
 ```
 
-Persist Spark DataFrame into DB2
+Persist data from Apache Spark DataFrames into DB2
 ```java
 import com.ibm.spark.ibmdataserver.Constants;
 import org.apache.spark.SparkConf;
