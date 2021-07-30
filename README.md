@@ -1,3 +1,5 @@
+This project is not being actively mantained and has been archived. 
+
 # DB2/DashDB Hi-Speed connector for Apache Spark
 
 A library for fast loading and unloading of data between Apache Spark and DB2/DashDB.
